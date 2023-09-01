@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const express = require("express");
 
 const app = express();
@@ -13,10 +15,10 @@ const userRoutes = require("./routes/user");
 const path = require("path");
 
 mongoose
-  .connect(
-    "mongodb+srv://Keres:ZHdNX51YwYzloypl@app-js-fullstack.pqdbyho.mongodb.net/Projet-7",
-    { useNewUrlParser: true, useUnifiedTopology: true }
-  )
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => console.log("Connexion à MongoDB réussie !"))
   .catch(() => console.log("Connexion à MongoDB échouée !"));
 

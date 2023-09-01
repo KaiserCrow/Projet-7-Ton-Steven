@@ -51,7 +51,7 @@ exports.modifyBook = (req, res, next) => {
   Book.findOne({ _id: req.params.id })
     .then((book) => {
       if (book.userId != req.auth.userId) {
-        res.status(401).json({ message: "Not authorized" });
+        res.status(403).json({ message: "Not authorized" });
       } else {
         Book.updateOne(
           { _id: req.params.id },
@@ -70,7 +70,7 @@ exports.deleteBook = (req, res, next) => {
   Book.findOne({ _id: req.params.id })
     .then((book) => {
       if (book.userId != req.auth.userId) {
-        res.status(401).json({ message: "Not authorized" });
+        res.status(403).json({ message: "Not authorized" });
       } else {
         const filename = book.imageUrl.split("/images/")[1];
         fs.unlink(`images/${filename}`, () => {
@@ -106,6 +106,15 @@ exports.rateBook = (req, res, next) => {
         return res.status(404).json({ message: "Livre non trouvé." });
       }
 
+      const userRating = book.ratings.find(
+        (rating) => rating.userId.toString() === req.auth.userId
+      );
+      if (userRating) {
+        return res
+          .status(400)
+          .json({ message: "Vous avez déjà évalué ce livre." });
+      }
+
       const rating = {
         userId: req.auth.userId,
         grade: req.body.rating,
@@ -116,7 +125,7 @@ exports.rateBook = (req, res, next) => {
       const averageRating =
         book.ratings.reduce((acc, rating) => acc + rating.grade, 0) /
         book.ratings.length;
-      book.averageRating = Math.round(averageRating);
+      book.averageRating = averageRating;
 
       book
         .save()
